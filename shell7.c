@@ -94,7 +94,7 @@ int main(void)
 
 	while (1)
 	{
-		if (write(STDOUT_FILENO, "$ ", 7) == -1)
+		if (write(STDOUT_FILENO, "$~ ", 7) == -1)
 		{
 			perror("Write failed");
 			return (1);
