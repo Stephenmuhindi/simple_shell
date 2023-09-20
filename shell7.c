@@ -4,6 +4,9 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <errno.h>
+
+extern char **environ; /* Declare environ */
 
 #define MAX_INPUT_LENGTH 1024
 #define MAX_TOKENS 10
@@ -19,25 +22,32 @@ int parse_command(char *input, char *tokens[]) {
         token = strtok(NULL, " \t\n");
     }
 
-    return (token_count);
+    tokens[token_count] = NULL; /* Add a NULL pointer as the last token */
+    return token_count;
 }
 
 /* Function to execute a command */
 int execute_command(char *tokens[]) {
-    pid_t pid;
     int status;
+    pid_t pid; /* Declare pid here */
 
-    pid = fork();
+    /* Check if the command exists */
+    if (access(tokens[0], X_OK) == -1) {
+        perror("Command not found");
+        return 1;
+    }
+
+    pid = fork(); /* Initialize pid here */
 
     if (pid < 0) {
         perror("Fork failed");
-        return (1);
+        return 1;
     }
 
     if (pid == 0) { /* Child process */
         /* Check for built-in commands */
         if (strcmp(tokens[0], "exit") == 0) {
-            exit(0);
+            exit(0); /* Exit the shell gracefully */
         } else if (strcmp(tokens[0], "cd") == 0) {
             if (tokens[1] != NULL) {
                 if (chdir(tokens[1]) != 0) {
@@ -46,18 +56,26 @@ int execute_command(char *tokens[]) {
                 }
             }
             exit(0);
+        } else if (strcmp(tokens[0], "env") == 0) {
+            /* Print the current environment */
+            char **env = environ;
+            while (*env != NULL) {
+                printf("%s\n", *env);
+                env++;
+            }
+            exit(0);
         }
 
-        /* Execute other commands */
+        /* Execute other commands using execvp */
         if (execvp(tokens[0], tokens) == -1) {
             perror("Command not found");
             exit(1);
         }
     } else { /* Parent process */
         waitpid(pid, &status, 0);
-        return (WEXITSTATUS(status));
+        return WEXITSTATUS(status);
     }
-    return (0);
+    return 0;
 }
 
 int main() {
@@ -66,13 +84,14 @@ int main() {
     int token_count;
 
     while (1) {
-        if (write(STDOUT_FILENO, "$~ ", 7) == -1) {
+        if (write(STDOUT_FILENO, "shell> ", 7) == -1) {
             perror("Write failed");
-            return (1);
+            return 1;
         }
         if (fgets(input, sizeof(input), stdin) == NULL) {
             if (write(STDOUT_FILENO, "\n", 1) == -1) {
                 perror("Write failed");
+                return 1;
             }
             break; /* End of file (Ctrl+D) or error */
         }
@@ -87,11 +106,11 @@ int main() {
                 snprintf(error_msg, sizeof(error_msg), "Command failed with exit code %d\n", result);
                 if (write(STDERR_FILENO, error_msg, strlen(error_msg)) == -1) {
                     perror("Write failed");
-                    return (1);
+                    return 1;
                 }
             }
         }
     }
 
-    return (0);
+    return 0;
 }
