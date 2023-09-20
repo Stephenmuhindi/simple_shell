@@ -1,3 +1,7 @@
+/**
+ * main - where the functions are called
+ * Return: always 0
+ */
 #include "shell.h"
 
 int main(void)
