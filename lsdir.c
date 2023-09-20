@@ -28,4 +28,3 @@ int main(void)
     printPathDirectories();
     return 0;
 }
-
