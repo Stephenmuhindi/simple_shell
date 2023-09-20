@@ -94,7 +94,7 @@ int main(void)
 
 	while (1)
 	{
-		if (write(STDOUT_FILENO, "shell> ", 7) == -1)
+		if (write(STDOUT_FILENO, "$ ", 7) == -1)
 		{
 			perror("Write failed");
 			return (1);
@@ -108,9 +108,7 @@ int main(void)
 			}
 			break;
 		}
-
 		token_count = parse_command(input, tokens);
-
 		if (token_count > 0)
 		{
 			int result = execute_command(tokens);
