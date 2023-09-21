@@ -14,7 +14,7 @@ int interactive(info_t *info)
  * is_delim - look if character is a delim
  * @c: char
  * @delim: delim
- * Return: 1 else 0 
+ * Return: 1 else 0
  */
 int is_delim(char c, char *delim)
 {

@@ -102,6 +102,7 @@ int read_history(info_t *info)
 /**
  * build_history_list - adds entry to linked list
  * @info: Struct
+ * @buf: buff
  * @linecount: the history linecount, histcount
  * Return: Always 0
  */
