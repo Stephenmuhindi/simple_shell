@@ -11,10 +11,17 @@ extern char **environ;
 #define MAX_INPUT_LENGTH 1024
 #define MAX_TOKENS 10
 
+/**
+ * parse_command -  Function to parse the command line into tokens.
+ * @input: input command line.
+ * @tokens: array to store the parsed tokens.
+ * Return: number of tokens found.
+ */
 int parse_command(char *input, char *tokens[])
 {
 	int token_count = 0;
 	char *token = strtok(input, " \t\n");
+	int length = strlen(tokens[token_count - 1]);
 
 	while (token != NULL && token_count < MAX_TOKENS)
 	{
@@ -22,11 +29,20 @@ int parse_command(char *input, char *tokens[])
 		token_count++;
 		token = strtok(NULL, " \t\n");
 	}
+	if (length > 0 && tokens[token_count - 1][length - 1] == '\n')
+	{
+		tokens[token_count - 1][length - 1] = '\0';
+	}
 
 	tokens[token_count] = NULL;
 	return (token_count);
 }
 
+/**
+ * execute_command - Function to execute
+ * @tokens: An array of strings containing the command and its arguments.
+ * Return: 0 if executed
+ */
 int execute_command(char *tokens[])
 {
 	int status;
@@ -86,6 +102,12 @@ int execute_command(char *tokens[])
 	return (0);
 }
 
+/**
+ * main - entry point for the shell
+ * @tokens: An array of command tokens
+ *
+ * Return: 0 on successful execution of the shell.
+ */
 int main(void)
 {
 	char input[MAX_INPUT_LENGTH];
@@ -94,7 +116,7 @@ int main(void)
 
 	while (1)
 	{
-		if (write(STDOUT_FILENO, "$~ ", 7) == -1)
+		if (write(STDOUT_FILENO, "$ ", 20) == -1)
 		{
 			perror("Write failed");
 			return (1);
